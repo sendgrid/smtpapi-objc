@@ -12,6 +12,17 @@
 
 @implementation SMTPAPI
 
+- (id)init
+{
+    self = [super init];
+    if (self)
+    {
+        self.header = [[NSMutableDictionary alloc] init];
+        self.encodedHeader = [[NSString alloc] init];
+    }
+    return self;
+}
+
 - (id)init:(NSMutableDictionary*)header
 {
     self = [super init];
@@ -52,28 +63,166 @@
     return [self.header objectForKey:@"to"];
 }
 
-- (SMTPAPI *)addSubstitution:(NSString *)key val:(NSString *) val
+- (SMTPAPI *)addSubstitution:(NSString *)key val:(NSString *)val
 {
-    if ([self.header objectForKey:@"sub"] == NULL)
-    {
-        NSMutableDictionary *sub = [[NSMutableDictionary alloc] init];
-        [self.header setObject:sub forKey:@"sub"];
-    }
     NSMutableDictionary *sub = [self.header objectForKey:@"sub"];
+    if (sub == NULL)
+    {
+        sub = [[NSMutableDictionary alloc] init];
+    }
     
-    [sub setObject:val forKey:key];
+    NSMutableArray *values = [sub objectForKey:key];
+    if (values == NULL)
+    {
+        values = [[NSMutableArray alloc] init];
+    }
+    
+    [values addObject:val];
+    [sub setObject:values forKey:key];
     
     [self.header setObject:sub forKey:@"sub"];
     
     return self;
 }
 
-- (SMTPAPI *)addSubstitutions:(NSString *)key val:(NSArray *) val
+- (SMTPAPI *)addSubstitutions:(NSString *)key val:(NSArray *)val
 {
     for (int i = 0; i < [val count]; i++) {
         [self addSubstitution:key val:val[i]];
     }
     return self;
+}
+
+- (SMTPAPI *)setSubstitutions:(NSMutableDictionary *)subs
+{
+    [self.header setObject:subs forKey:@"sub"];
+    return self;
+}
+
+- (NSMutableDictionary *)getSubstitutions
+{
+    return [self.header objectForKey:@"sub"];
+}
+
+- (SMTPAPI *)addUniqueArg:(NSString *)key val:(NSString *)val
+{
+    if ([self.header objectForKey:@"unique_args"] == NULL)
+    {
+        NSMutableDictionary *uniqueArguments = [[NSMutableDictionary alloc] init];
+        [self.header setObject:uniqueArguments forKey:@"unique_args"];
+    }
+    
+    NSMutableDictionary *uniqueArguments = [self.header objectForKey:@"unique_args"];
+    [uniqueArguments setObject:val forKey:key];
+    [self.header setObject:uniqueArguments forKey:@"unique_args"];
+    
+    return self;
+}
+
+- (SMTPAPI *)setUniqueArgs:(NSMutableDictionary *)args
+{
+    [self.header setObject:args forKey:@"unique_args"];
+    return self;
+}
+
+- (NSMutableDictionary *)getUniqueArgs {
+    return [self.header objectForKey:@"unique_args"];
+}
+
+- (SMTPAPI *)addCategory:(NSString *)val {
+    NSMutableArray *categories = [self.header objectForKey:@"category"];
+    if(categories == NULL) {
+        categories = [[NSMutableArray alloc] init];
+    }
+    [categories addObject:val];
+    [self.header setObject:categories forKey:@"category"];
+    return self;
+}
+
+- (SMTPAPI *)addCategories:(NSMutableArray *)vals {
+    for (int i = 0; i < vals.count; i++) {
+        [self addCategory:[vals objectAtIndex:i]];
+    }
+    return self;
+}
+
+- (SMTPAPI *)setCategories:(NSMutableArray *)cat {
+    [self.header setObject:@"category" forKey:cat];
+    return self;
+}
+
+- (NSMutableArray *)getCategories {
+    return [self.header objectForKey:@"category"];
+}
+
+- (SMTPAPI *)addSection:(NSString *)key val:(NSString *)val {
+    NSMutableDictionary *sections = [self.header objectForKey:@"section"];
+    if (sections == NULL) {
+        sections = [[NSMutableDictionary alloc] init];
+    }
+    
+    [sections setObject:val forKey:key];
+    [self.header setObject:sections forKey:@"section"];
+    
+    return self;
+}
+
+- (SMTPAPI *)setSections:(NSMutableDictionary *)sec {
+    [self.header setObject:@"section" forKey:sec];
+    return self;
+}
+
+- (NSMutableDictionary *)getSections {
+    return [self.header objectForKey:@"section"];
+}
+
+- (SMTPAPI *)addFilter:(NSString *)filter setting:(NSString *)setting val:(NSString *)val {
+    NSMutableDictionary *filters = [self.header objectForKey:@"filters"];
+    if (filters == NULL) {
+        filters = [[NSMutableDictionary alloc] init];
+    }
+    NSMutableDictionary *filterDictionary = [filters objectForKey:filter];
+    if (filterDictionary == NULL) {
+        filterDictionary = [[NSMutableDictionary alloc] init];
+    }
+    NSMutableDictionary *settingsDictionary = [filterDictionary objectForKey:@"settings"];
+    if(settingsDictionary == NULL) {
+        settingsDictionary = [[NSMutableDictionary alloc] init];
+    }
+    [settingsDictionary setObject:val forKey:setting];
+    [filterDictionary setObject:settingsDictionary forKey:@"settings"];
+    [filters setObject:filterDictionary forKey:filter];
+    [self.header setObject:filters forKey:@"filters"];
+    return self;
+}
+
+- (SMTPAPI *)addFilter:(NSString *)filter settings:(NSString *)setting val:(int)val {
+    NSMutableDictionary *filters = [self.header objectForKey:@"filters"];
+    if (filters == NULL) {
+        filters = [[NSMutableDictionary alloc] init];
+    }
+    NSMutableDictionary *filterDictionary = [filters objectForKey:filter];
+    if (filterDictionary == NULL) {
+        filterDictionary = [[NSMutableDictionary alloc] init];
+    }
+    NSMutableDictionary *settingsDictionary = [filterDictionary objectForKey:@"settings"];
+    if(settingsDictionary == NULL) {
+        settingsDictionary = [[NSMutableDictionary alloc] init];
+    }
+    [settingsDictionary setObject:[NSNumber numberWithInt:val] forKey:setting];
+    [filterDictionary setObject:settingsDictionary forKey:@"settings"];
+    [filters setObject:filterDictionary forKey:filter];
+    [self.header setObject:filters forKey:@"filters"];
+    return self;
+}
+
+- (SMTPAPI *)setFilters:(NSMutableDictionary *)filters {
+    [self.header setObject:filters forKey:@"fiters"];
+    return self;
+}
+
+- (NSMutableDictionary *)getFilters {
+    return [self.header objectForKey:@"filters"];
 }
 
 #pragma mark - Header Methods
@@ -85,20 +234,12 @@
 
 - (void)configureHeader
 {
-//    if (self.toList != nil)
-//    {
-//        [self.header setObject:self.toList forKey:@"to"];
-//        self.to = [self.toList objectAtIndex:0];
-//    }
-    
-    
-//    if (self.header != nil)
-//        self.xsmtpapi = [self headerEncode:self.header];
+    if (self.header != nil)
+        self.encodedHeader = [self encodeHeader:self.header];
 }
 
-- (NSString *)headerEncode:(NSMutableDictionary *)header
+- (NSString *)encodeHeader:(NSMutableDictionary *)header
 {
-    //Converts NSDictionary of Header arguments to JSON string
     NSError *error;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:header
                                                        options:0
