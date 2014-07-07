@@ -14,7 +14,7 @@ Choose your installation method - CocoaPods (recommended) or via source.
 
 ```ruby
 platform :ios, '7.0'
-pod 'sendgrid', '~>  0.1.0'
+pod 'smtpapi', '~>  0.1.0'
 ```
 
 Run the following in the command line
