@@ -77,6 +77,7 @@ NSMutableDictionary *uniqueArgs = [[NSMutableDictionary alloc] init];
 
 NSMutableDictionary *args = [header getUniqueArgs];
 ```
+
 ### [Categories](http://sendgrid.com/docs/API_Reference/SMTP_API/categories.html)
 
 ```objective-c
@@ -117,4 +118,6 @@ NSMutableDictionary *filters = [header getFilters];
 NSString *headers = header.encodedHeader;
 ```
 
-## MIT
+## License
+
+Licensed under the MIT License.
